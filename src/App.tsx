@@ -1,13 +1,27 @@
 import * as Location from "expo-location";
 import React, { useEffect, useMemo, useState } from "react";
 import { StyleSheet, View } from "react-native";
-import MapView, { Marker, Region } from "react-native-maps";
+import MapView, { Marker, Polygon, Region } from "react-native-maps";
+import { Coord } from "./types";
+import {
+  generatePolygonAroundCoords,
+  mergeIntersectingPolygons,
+} from "./utils";
+
+const fullWorldFOG = [
+  { latitude: -90, longitude: -180 },
+  { latitude: 90, longitude: -180 },
+  { latitude: 90, longitude: 0 },
+  { latitude: 90, longitude: 179.9 },
+  { latitude: -90, longitude: 179.9 },
+];
 
 export default function App() {
   const [locationGranted, setLocationGranted] = useState(false);
   const [location, setLocation] = useState<Location.LocationObject | null>(
     null
   );
+  const [holes, setHoles] = useState<Array<Coord[]>>([]);
 
   const userLocation = useMemo((): Region | undefined => {
     if (!location) {
@@ -37,8 +51,6 @@ export default function App() {
     if (locationGranted) {
       const usubPromise = Location.watchPositionAsync(
         {
-          // accuracy: Location.Accuracy.BestForNavigation,
-          // timeInterval: 500,
           distanceInterval: 0.5,
         },
         (location) => {
@@ -53,18 +65,47 @@ export default function App() {
       };
     }
   }, [locationGranted]);
+  useEffect(() => {
+    if (userLocation) {
+      setHoles((prevHoles) => {
+        const newHoles = [
+          ...prevHoles,
+          generatePolygonAroundCoords(userLocation, 8, 0.1),
+        ];
+        if (newHoles.length < 2) {
+          return newHoles;
+        }
+        // if (newHoles.length > 2) {
+        //   console.log("Too much polygons");
+        //   return newHoles;
+        // }
+        return mergeIntersectingPolygons(newHoles);
+      });
+    }
+  }, [userLocation]);
   return (
     <View style={styles.container}>
       {userLocation && (
-        <MapView
-          style={styles.map}
-          initialRegion={userLocation}
-          // onRegionChange={(region, details) => {
-          //   console.log({ region, details });
-          // }}
-        >
-          {userLocation && <Marker coordinate={userLocation} />}
-        </MapView>
+        <View style={styles.mapContainer}>
+          <MapView
+            style={styles.map}
+            initialRegion={userLocation}
+            onRegionChange={(region, details) => {
+              // region.
+              // console.log({ region, details });
+            }}
+          >
+            {userLocation && <Marker coordinate={userLocation} />}
+            {holes.map((hole, i) => (
+              <Polygon
+                coordinates={hole}
+                key={i}
+                fillColor="rgba(0, 0, 0, 0.5)"
+                strokeColor="rgba(0, 0, 0, 0)"
+              />
+            ))}
+          </MapView>
+        </View>
       )}
     </View>
   );
@@ -74,8 +115,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
+  },
+  mapContainer: {
+    flex: 1,
   },
   map: {
     width: "100%",
