@@ -6,6 +6,7 @@ export default function HomeScreen() {
     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
       <Text>Hello</Text>
       <Link href="/auth">Authorize</Link>
+      <Link href="/map">Explorer map</Link>
     </View>
   );
 }
