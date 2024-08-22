@@ -12,5 +12,8 @@
         }
       ]
     ]
+  },
+  "web": {
+    "bundler": "metro"
   }
 }
