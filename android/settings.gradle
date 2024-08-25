@@ -44,7 +44,7 @@ if (getRNMinorVersion() >= 75) {
   }
 }
 
-rootProject.name = 'cityexplorer'
+rootProject.name = 'city-exporer'
 
 dependencyResolutionManagement {
   versionCatalogs {

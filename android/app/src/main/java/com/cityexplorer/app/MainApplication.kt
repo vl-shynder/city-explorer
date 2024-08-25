@@ -1,4 +1,4 @@
-package com.cityexplorer
+package com.cityexplorer.app
 
 import android.app.Application
 import android.content.res.Configuration

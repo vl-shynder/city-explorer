@@ -4,5 +4,11 @@
     "forceConsistentCasingInFileNames": true
   },
   "extends": "expo/tsconfig.base",
-  "$schema": "https://json.schemastore.org/tsconfig"
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    ".expo/types/**/*.ts",
+    "expo-env.d.ts"
+  ]
 }
