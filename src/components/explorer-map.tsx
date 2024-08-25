@@ -16,7 +16,7 @@ const fullWorldFOG = [
   { latitude: -90, longitude: 179.9 },
 ];
 
-export default function ExplorerMap() {
+export const ExplorerMap = () => {
   const [locationGranted, setLocationGranted] = useState(false);
   const [location, setLocation] = useState<Location.LocationObject | null>(
     null
@@ -109,7 +109,7 @@ export default function ExplorerMap() {
       )}
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {

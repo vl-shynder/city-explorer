@@ -1,6 +1,7 @@
 import { UserCredentials } from "../schemas";
 import { supabase } from "./client";
 
+// TODO: handle errors and display to user
 export async function login({
   email,
   password,
