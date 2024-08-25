@@ -1,27 +1,22 @@
+import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import * as Location from "expo-location";
-import React, { useEffect, useMemo, useState } from "react";
-import { StyleSheet, View } from "react-native";
-import MapView, { Marker, Polygon, Region } from "react-native-maps";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { StyleSheet, TouchableOpacity } from "react-native";
+import MapView, { Polygon, PROVIDER_GOOGLE, Region } from "react-native-maps";
+import { View } from "tamagui";
+import { silverMapStyle } from "../constants";
 import { Coord } from "../types";
 import {
   generatePolygonAroundCoords,
   mergeIntersectingPolygons,
 } from "../utils";
 
-const fullWorldFOG = [
-  { latitude: -90, longitude: -180 },
-  { latitude: 90, longitude: -180 },
-  { latitude: 90, longitude: 0 },
-  { latitude: 90, longitude: 179.9 },
-  { latitude: -90, longitude: 179.9 },
-];
-
 export const ExplorerMap = () => {
-  const [locationGranted, setLocationGranted] = useState(false);
   const [location, setLocation] = useState<Location.LocationObject | null>(
     null
   );
   const [holes, setHoles] = useState<Array<Coord[]>>([]);
+  const mapRef = useRef<MapView>(null);
 
   const userLocation = useMemo((): Region | undefined => {
     if (!location) {
@@ -30,41 +25,35 @@ export const ExplorerMap = () => {
     return {
       latitude: location.coords.latitude,
       longitude: location.coords.longitude,
-      latitudeDelta: 0.0922,
-      longitudeDelta: 0.0421,
+      latitudeDelta: 0.04,
+      longitudeDelta: 0.02,
     };
   }, [location]);
 
-  useEffect(() => {
-    const init = async () => {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        console.log("Permission to access location was denied");
-        return;
-      }
-      setLocationGranted(true);
-    };
-    init();
-  }, []);
-
-  useEffect(() => {
-    if (locationGranted) {
-      const usubPromise = Location.watchPositionAsync(
-        {
-          distanceInterval: 0.5,
-        },
-        (location) => {
-          setLocation(location);
-        }
-      );
-
-      return () => {
-        usubPromise.then((usub) => () => {
-          usub.remove();
-        });
-      };
+  const zoomToUserLocation = () => {
+    if (userLocation) {
+      mapRef.current?.animateToRegion(userLocation);
     }
-  }, [locationGranted]);
+  };
+
+  useEffect(() => {
+    const unsubPromise = Location.watchPositionAsync(
+      {
+        distanceInterval: 0.5,
+      },
+      (location) => {
+        console.log("location");
+        setLocation(location);
+      }
+    );
+
+    return () => {
+      unsubPromise.then((usub) => () => {
+        console.log("unsubscribing");
+        usub.remove();
+      });
+    };
+  }, []);
   useEffect(() => {
     if (userLocation) {
       setHoles((prevHoles) => {
@@ -84,18 +73,21 @@ export const ExplorerMap = () => {
     }
   }, [userLocation]);
   return (
-    <View style={styles.container}>
+    <View flex={1} backgroundColor={"grey"}>
       {userLocation && (
-        <View style={styles.mapContainer}>
+        <View flex={1}>
           <MapView
+            ref={mapRef}
             style={styles.map}
+            customMapStyle={silverMapStyle}
+            provider={PROVIDER_GOOGLE}
             initialRegion={userLocation}
-            onRegionChange={(region, details) => {
-              // region.
-              // console.log({ region, details });
-            }}
+            showsUserLocation
+            // onRegionChange={(region, details) => {
+            //   // region.
+            //   // console.log({ region, details });
+            // }}
           >
-            {userLocation && <Marker coordinate={userLocation} />}
             {holes.map((hole, i) => (
               <Polygon
                 coordinates={hole}
@@ -105,6 +97,18 @@ export const ExplorerMap = () => {
               />
             ))}
           </MapView>
+          <View
+            position="absolute"
+            bottom="$2"
+            right="$2"
+            backgroundColor="white"
+            padding="$2"
+            borderRadius="$2"
+          >
+            <TouchableOpacity onPress={zoomToUserLocation}>
+              <FontAwesome5 name="location-arrow" size={24} color="black" />
+            </TouchableOpacity>
+          </View>
         </View>
       )}
     </View>
@@ -112,13 +116,6 @@ export const ExplorerMap = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-  },
-  mapContainer: {
-    flex: 1,
-  },
   map: {
     width: "100%",
     height: "100%",
