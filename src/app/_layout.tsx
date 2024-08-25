@@ -22,7 +22,7 @@ export default function RootLayout() {
     if (user) {
       router.replace("/(tabs)");
     } else {
-      router.replace("/(hello)");
+      router.replace("/(onboarding)");
     }
   }, [user]);
 

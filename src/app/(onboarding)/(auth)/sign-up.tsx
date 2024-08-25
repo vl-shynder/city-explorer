@@ -10,13 +10,12 @@ export default function SignUpScreen() {
       <AuthForm
         type="sign-up"
         onSuccess={() => {
-          console.log("user created");
           router.replace("/(auth)/sign-in");
         }}
       />
       <Text paddingTop="$2">
         Alread have an account?{" "}
-        <Link href="/(hello)/(auth)/sign-in">Sign In</Link>
+        <Link href="/(onboarding)/(auth)/sign-in">Sign In</Link>
       </Text>
     </View>
   );

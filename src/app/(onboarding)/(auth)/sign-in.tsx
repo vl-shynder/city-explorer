@@ -15,7 +15,7 @@ export default function SignInScreen() {
       />
       <Text paddingTop="$2">
         Don't have an account yet?{" "}
-        <Link href="/(hello)/(auth)/sign-up">Sign up</Link>
+        <Link href="/(onboarding)/(auth)/sign-up">Sign up</Link>
       </Text>
     </View>
   );

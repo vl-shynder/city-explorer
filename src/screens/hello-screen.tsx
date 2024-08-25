@@ -10,7 +10,7 @@ export const HelloScreen = () => {
           <H1>City Explorer</H1>
           <H4>Discover hidden gems in the city</H4>
         </YStack>
-        <Link asChild href="/(hello)/(auth)/sign-in">
+        <Link asChild href="/(onboarding)/(auth)/sign-in">
           <Button>Start</Button>
         </Link>
       </YStack>
