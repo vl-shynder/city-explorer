@@ -7,15 +7,20 @@ import { AvatarSizeVariant } from "../types";
 type AvatarProps = {
   url?: string;
   size?: AvatarSizeVariant;
+  color?: string;
 };
 
-export const Avatar: FC<AvatarProps> = ({ url, size = "small" }) => {
+export const Avatar: FC<AvatarProps> = ({
+  url,
+  size = "small",
+  color = "black",
+}) => {
   if (!url) {
     return (
       <Ionicons
         name="person-circle-outline"
         size={AvatarSizeVariants[size]}
-        color="black"
+        color={color}
       />
     );
   }
