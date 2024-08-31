@@ -43,3 +43,7 @@ yarn-error.*
 
 expo-env.d.ts
 # @end expo-cli
+
+# Prevent API keys from showing up on github (eg. Google Maps API keys)
+ios
+android
