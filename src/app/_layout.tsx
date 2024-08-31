@@ -4,27 +4,34 @@ import {
   ThemeProvider,
 } from "@react-navigation/native";
 
-import { router, Slot } from "expo-router";
+import { Slot, useRouter, useSegments } from "expo-router";
 
 import { useColorScheme } from "react-native";
 
 import { useEffect } from "react";
 import { TamaguiProvider } from "tamagui";
 import { tamaguiConfig } from "../../tamagui.config";
-import { useAuthUser } from "../hooks";
+import { useAuthStateListener } from "../hooks";
+import { useAuth } from "../store";
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
 
-  const { user } = useAuthUser();
+  const segment = useSegments();
+  const router = useRouter();
+
+  useAuthStateListener();
+  const { isSignedIn } = useAuth();
 
   useEffect(() => {
-    if (user) {
-      router.replace("/(tabs)");
-    } else {
+    const isAuthRoute = segment[0] === "(authenticated)";
+
+    if (!isSignedIn && isAuthRoute) {
       router.replace("/(onboarding)");
+    } else if (isSignedIn && !isAuthRoute) {
+      router.replace("/(authenticated)");
     }
-  }, [user]);
+  }, [isSignedIn]);
 
   return (
     <TamaguiProvider config={tamaguiConfig} defaultTheme={colorScheme!}>

@@ -15,6 +15,10 @@ export async function login({
   return error?.message ?? null;
 }
 
+export async function logout() {
+  await supabase.auth.signOut();
+}
+
 export async function createAccount({ email, password }: UserCredentials) {
   const { data, error } = await supabase.auth.signUp({
     email,

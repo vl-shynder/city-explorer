@@ -3,7 +3,8 @@ import { FC } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Button, Spacer, YStack } from "tamagui";
 import { UserCredentials, UserCredentialsSchema } from "../schemas";
-import { createAccount, login } from "../supabase";
+import { useAuth } from "../store";
+import { createAccount } from "../supabase";
 import { Input } from "./input";
 
 type AuthFormProps = {
@@ -12,13 +13,14 @@ type AuthFormProps = {
 };
 
 export const AuthForm: FC<AuthFormProps> = ({ type, onSuccess }) => {
+  const { signIn } = useAuth();
   const form = useForm<UserCredentials>({
     resolver: zodResolver(UserCredentialsSchema),
   });
 
   const onSubmit = form.handleSubmit((data) => {
     if (type === "sign-in") {
-      login(data).then((error) => {
+      signIn(data).then((error) => {
         if (!error) {
           onSuccess();
         }
