@@ -1,10 +1,11 @@
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
-import * as Location from "expo-location";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { StyleSheet, TouchableOpacity } from "react-native";
 import MapView, { Polygon, PROVIDER_GOOGLE, Region } from "react-native-maps";
 import { View } from "tamagui";
 import { silverMapStyle } from "../constants";
+import { useLocationSubscription } from "../hooks";
+import { useLocationStore } from "../store";
 import { Coord } from "../types";
 import {
   generatePolygonAroundCoords,
@@ -12,23 +13,23 @@ import {
 } from "../utils";
 
 export const ExplorerMap = () => {
-  const [location, setLocation] = useState<Location.LocationObject | null>(
-    null
-  );
   const [holes, setHoles] = useState<Array<Coord[]>>([]);
   const mapRef = useRef<MapView>(null);
 
+  const { currentLocation } = useLocationStore();
+  useLocationSubscription();
+
   const userLocation = useMemo((): Region | undefined => {
-    if (!location) {
+    if (!currentLocation) {
       return undefined;
     }
     return {
-      latitude: location.coords.latitude,
-      longitude: location.coords.longitude,
+      latitude: currentLocation.coords.latitude,
+      longitude: currentLocation.coords.longitude,
       latitudeDelta: 0.04,
       longitudeDelta: 0.02,
     };
-  }, [location]);
+  }, [currentLocation]);
 
   const zoomToUserLocation = () => {
     if (userLocation) {
@@ -36,24 +37,6 @@ export const ExplorerMap = () => {
     }
   };
 
-  useEffect(() => {
-    const unsubPromise = Location.watchPositionAsync(
-      {
-        distanceInterval: 0.5,
-      },
-      (location) => {
-        console.log("location");
-        setLocation(location);
-      }
-    );
-
-    return () => {
-      unsubPromise.then((usub) => () => {
-        console.log("unsubscribing");
-        usub.remove();
-      });
-    };
-  }, []);
   useEffect(() => {
     if (userLocation) {
       setHoles((prevHoles) => {
